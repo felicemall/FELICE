@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>컬러 선택</title>
+<style>
+    body {
+        text-align: center; 
+        font-family: Arial, sans-serif;
+    }
+
+    h2 {
+        font-size: 32px;
+        font-weight: 900;
+    }
+
+    .color-options {
+        display: flex; 
+        justify-content: center; 
+        gap: 10px; 
+        margin: 20px 0;
+        flex-wrap: wrap;
+    }
+
+    .color-chip {
+    width: 30px; 
+    height: 30px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    border: 1px solid #e0e0e0;  /* 얇은 그레이 테두리 추가 */
+}
+
+.color-chip.selected {
+    border: 2px solid #000000;  /* 선택된 칩의 테두리는 더 진하게 */
+}
+
+    #colorName {
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
+        gap: 10px; 
+        margin-top: 15px; 
+        font-size: 18px; 
+        font-weight: bold;
+    }
+
+    #colorName .chip-preview {
+        width: 20px; 
+        height: 20px; 
+        border-radius: 50%; 
+        display: inline-block;
+        border: 1px solid #aaa;
+    }
+
+    .image-wrapper {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .image-container {
+        display: flex; 
+        gap: 10px;
+        position: relative;
+        justify-content: center;
+    }
+
+    .image-container img {
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+        object-fit: cover;
+        position: relative;
+        z-index: 1;
+    }
+
+    .nav-button {
+        position: absolute;
+        top: 50%; 
+        transform: translateY(-50%);
+        font-size: 40px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        user-select: none;
+        z-index: 2;
+        color: #000;
+        padding: 0;
+    }
+
+    @media screen and (min-width: 769px) {
+        .nav-button.left {
+            left: calc(50% - 520px);
+        }
+
+        .nav-button.right {
+            right: calc(50% - 520px);
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        h2 {
+            font-size: 24px;
+        }
+        #colorName {
+            font-size: 16px;
+        }
+        .image-container {
+            flex-direction: column;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .nav-button.left {
+            left: 10px;
+        }
+        .nav-button.right {
+            right: 10px;
+        }
+    }
+
+    .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .pagination span {
+        display: inline-block;
+        width: 10px; 
+        height: 10px;
+        border-radius: 50%;
+        background-color: lightgray;
+    }
+
+    .pagination span.active {
+        background-color: black;
+    }
+</style>
+</head>
+<body>
+<h2>COLOR CHOICE</h2>
+<p>원하는 컬러를 클릭해보세요.</p>
+<div id="colorOptions" class="color-options"></div>
+<p id="colorName"></p>
+
+<div class="image-wrapper">
+    <button class="nav-button left" onclick="prevImage()">&#x2039;</button>
+    <div id="imageContainer" class="image-container"></div>
+    <button class="nav-button right" onclick="nextImage()">&#x203A;</button>
+</div>
+<div id="pagination" class="pagination"></div>
+
+<script>
+const colors = [
+    {
+        name: "화이트",
+        code: "#ffffff",
+        images: [
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_WHITE_01.jpg",
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_WHITE_02.jpg"
+        ]
+    },
+    {
+        name: "아이보리",
+        code: "#fcfbe8",
+        images: [
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_IVORY_01.jpg",
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_IVORY_02.jpg"
+        ]
+    },
+    {
+        name: "핑크",
+        code: "#ffcccc",
+        images: [
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_PINK_01.jpg",
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_PINK_02.jpg"
+        ]
+    },
+    {
+        name: "베이지",
+        code: "#e6e3de",
+        images: [
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_BEIGE_01.jpg",
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_BEIGE_02.jpg"
+        ]
+    },
+    {
+        name: "블랙",
+        code: "#0f0f0f",
+        images: [
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_BLACK_01.jpg",
+            "https://felicemall6435.imghost.cafe24.com/2025/FELICEMALL/IMAGE/GWSKIJK182W_BOX_IMG_BLACK_02.jpg"
+        ]
+    }
+];
+
+let currentColorIndex = 0;
+let currentImageStart = 0;
+
+const colorOptions = document.getElementById("colorOptions");
+const colorName = document.getElementById("colorName");
+const imageContainer = document.getElementById("imageContainer");
+const pagination = document.getElementById("pagination");
+
+function renderColorChips() {
+    colorOptions.innerHTML = "";
+    colors.forEach((color, index) => {
+        const chip = document.createElement("div");
+        chip.classList.add("color-chip");
+        if (index === currentColorIndex) chip.classList.add("selected");
+        chip.style.backgroundColor = color.code;
+        chip.addEventListener("click", () => {
+            currentColorIndex = index;
+            currentImageStart = 0;
+            renderColorChips();
+            updateDisplay();
+        });
+        colorOptions.appendChild(chip);
+    });
+}
+
+function updateDisplay() {
+    const currentColor = colors[currentColorIndex];
+    const images = currentColor.images;
+    const imagesPerPage = window.innerWidth <= 768 ? 1 : 2;
+    const visibleImages = images.slice(currentImageStart, currentImageStart + imagesPerPage);
+    colorName.innerHTML = `<span class="chip-preview" style="background-color: ${currentColor.code}"></span>${currentColor.name}`;
+    imageContainer.innerHTML = visibleImages.map(image => `<img src="${image}" alt="${currentColor.name}">`).join("");
+
+    pagination.innerHTML = "";
+    const totalPages = Math.ceil(images.length / imagesPerPage);
+    const currentPage = Math.floor(currentImageStart / imagesPerPage);
+    for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement("span");
+        if (i === currentPage) dot.classList.add("active");
+        pagination.appendChild(dot);
+    }
+}
+
+function prevImage() {
+    const totalImages = colors[currentColorIndex].images.length;
+    const imagesPerPage = window.innerWidth <= 768 ? 1 : 2;
+    if (totalImages <= imagesPerPage || currentImageStart === 0) {
+        currentImageStart = 0;
+    } else {
+        currentImageStart = (currentImageStart - imagesPerPage + totalImages) % totalImages;
+    }
+    updateDisplay();
+}
+
+function nextImage() {
+    const totalImages = colors[currentColorIndex].images.length;
+    const imagesPerPage = window.innerWidth <= 768 ? 1 : 2;
+    if (currentImageStart + imagesPerPage >= totalImages) {
+        currentImageStart = 0;
+    } else {
+        currentImageStart += imagesPerPage;
+    }
+    updateDisplay();
+}
+
+renderColorChips();
+updateDisplay();
+window.addEventListener("resize", updateDisplay);
+</script>
+</body>
+</html>
